@@ -1,2 +1,2 @@
-# machine-learn
+# machine-learning
 some algorithm
