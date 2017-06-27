@@ -1,0 +1,92 @@
+from sklearn import datasets
+import numpy as np
+
+#导入20news数据
+def load_data(max_len=300,batch_size=50):
+    data=datasets.fetch_20newsgroups(data_home='~/AnacondaProjects/data/scikit_learn_data',remove=('headers','footers'))
+    all_data=data.data
+    #将文本转换为序列
+    def convert(data):
+        words2nums={}
+        all_words=[]
+        result=[]
+        papers=[]
+        data=[x.replace(',','').replace('.','').replace("'",'').replace('\n',' ') for x in data]
+        for i in data:
+            one_paper=[x for x in i.split(' ') if x.isalpha()]
+            papers.append(one_paper)
+            all_words+=one_paper
+        all_words=list(set(all_words))
+        # print(len(all_words))
+        for i,j in enumerate(all_words):
+            words2nums[j]=i
+        for i in papers:
+            result.append([words2nums[x] for x in i if x in words2nums])
+        return result
+
+    all_data=convert(all_data)
+    all_targets=data.target
+    train_nums=8000
+    test_nums=2000
+    # max_len=300
+    sample_nums=len(all_data)
+
+    train_data=(all_data[:train_nums],all_targets[:train_nums])
+    test_data=(all_data[train_nums:train_nums+test_nums],all_targets[train_nums:train_nums+test_nums])
+    valid_data=(all_data[train_nums+test_nums:],all_targets[train_nums+test_nums:])
+
+    new_train_data=np.zeros([len(train_data[0]),max_len])
+    new_train_label=np.zeros([len(train_data[0])])
+
+    new_test_data=np.zeros([len(test_data[0]),max_len])
+    new_test_label=np.zeros([len(test_data[0])])
+
+    new_valid_data=np.zeros([len(valid_data[0]),max_len])
+    new_valid_label=np.zeros([len(valid_data[0])])
+
+    new_mask_train_data_x=np.zeros([max_len,len(train_data[0])])
+    new_mask_test_data_x=np.zeros([max_len,len(test_data[0])])
+    new_mask_valid_data_x=np.zeros([max_len,len(valid_data[0])])
+
+
+
+    def padding_and_generate_mask(x,y,new_x,new_y,new_mask_x):
+        for i,(x,y) in enumerate(zip(x,y)):
+            if len(x)<=max_len:
+                new_x[i,0:len(x)]=x
+                new_mask_x[0:len(x),i]=1
+                new_y[i]=y
+            else:
+                new_x[i]=(x[0:max_len])
+                new_mask_x[:,i]=1
+                new_y[i]=y
+        new_set=(new_x,new_y,new_mask_x)
+        return new_set
+
+    train_set=padding_and_generate_mask(train_data[0],train_data[1],new_train_data,new_train_label,new_mask_train_data_x)
+    test_set=padding_and_generate_mask(test_data[0],test_data[1],new_test_data,new_test_label,new_mask_test_data_x)
+    valid_set=padding_and_generate_mask(valid_data[0],valid_data[1],new_valid_data,new_valid_label,new_mask_valid_data_x)
+
+    return train_set,test_set,valid_set
+
+def batch_iter(data,batch_size):
+    x,y,mask_x=data
+    x=np.array(x)
+    y=np.array(y)
+    data_size=len(x)
+    num_epoch=int(data_size-1/batch_size)
+    for batch_index in range(num_epoch):
+        start_index=batch_index*batch_size
+        end_index=min((batch_index+1)*batch_size,data_size)
+        return_x=x[start_index:end_index]
+        return_y=y[start_index:end_index]
+        return_mask_x=mask_x[:,start_index:end_index]
+        yield (return_x,return_y,return_mask_x)
+
+if __name__=='__main__':
+    train_data,test_data,valid_data=load_data()
+    for x,y,z in batch_iter(train_data,50):
+        print(x,y,z)
+        break
+#     for i in range(100):
+#         print(batch_iter(train_data, 50))
