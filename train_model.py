@@ -61,7 +61,7 @@ def evaluate(model,session,data,global_steps=None,summary_writer=None):
         feed_dict[model.input_data]=x
         feed_dict[model.target]=y
         feed_dict[model.mask_x]=mask_x
-        model.assign_new_batch_size(session,len(x))
+        # model.assign_new_batch_size(session,len(x))
         state = session.run(model._initial_state)
         for i , (c,h) in enumerate(model._initial_state):
             feed_dict[c]=state[i].c
@@ -84,7 +84,7 @@ def run_epoch(model,session,data,global_steps,valid_model,valid_data,train_summa
         feed_dict[model.input_data]=x
         feed_dict[model.target]=y
         feed_dict[model.mask_x]=mask_x
-        model.assign_new_batch_size(session,len(x))
+        # model.assign_new_batch_size(session,len(x))
         fetches = [model.cost,model.accuracy,model.train_op,model.summary]
         state = session.run(model._initial_state)
         for i , (c,h) in enumerate(model._initial_state):

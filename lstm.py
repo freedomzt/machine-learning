@@ -10,7 +10,8 @@ class LSTM_Model(object):
     def __init__(self,config,is_training=True):
 
         self.keep_prob=config.keep_prob
-        self.batch_size=tf.Variable(0,dtype=tf.int32,trainable=False)
+        # self.batch_size=tf.Variable(0,dtype=tf.int32,trainable=False)
+        self.batch_size=config.batch_size
 
         num_step=config.num_step
         self.input_data=tf.placeholder(tf.int32,[None,num_step])
@@ -22,8 +23,8 @@ class LSTM_Model(object):
         vocabulary_size=config.vocabulary_size
         embed_dim=config.embed_dim
         hidden_layer_num=config.hidden_layer_num
-        self.new_batch_size = tf.placeholder(tf.int32,shape=[],name="new_batch_size")
-        self._batch_size_update = tf.assign(self.batch_size,self.new_batch_size)
+        # self.new_batch_size = tf.placeholder(tf.int32,shape=[],name="new_batch_size")
+        # self._batch_size_update = tf.assign(self.batch_size,self.new_batch_size)
 
         #build LSTM network
         def lstm_cell():
